@@ -31,10 +31,10 @@ public class Application {
 
                     switch (result) {
                         case 1:
-                            showAllProductForConsumer();
+                            showAllProductForConsumer(reader);
                             break;
                         case 2:
-                            showAllConsumerForProduct();
+                            showAllConsumerForProduct(reader);
                             break;
                         case 3:
                             showAllConsumer();
@@ -71,20 +71,34 @@ public class Application {
         System.out.println(sb.toString());
     }
 
-    private static void showAllProductForConsumer() {
+    private static void showAllProductForConsumer(BufferedReader reader) {
         EntityManager entityManager = DBUtil.getEntityManagerFactory().createEntityManager();
-        Consumer consumer = entityManager.find(Consumer.class, 1L);
-        TypedQuery<Product> query = entityManager.createQuery("SELECT p FROM Product p INNER JOIN p.consumers c WHERE c.id = :consumerId", Product.class);
-        List<Product> resultList = query.setParameter("consumerId", consumer.getId()).getResultList();
-        resultList.forEach(System.out::println);
+        Consumer consumer = enterDataForConsumer(reader);
+        if (consumer != null) {
+            TypedQuery<Product> query = entityManager.createQuery(
+                    "SELECT p FROM Product p INNER JOIN p.consumers c WHERE c.id = :consumerId"
+                    , Product.class);
+            List<Product> resultList = query.setParameter("consumerId", consumer.getId()).getResultList();
+            resultList.forEach(System.out::println);
+        } else {
+            System.out.println("Покупатель не найден.");
+        }
+        entityManager.close();
     }
 
-    private static void showAllConsumerForProduct() {
+    private static void showAllConsumerForProduct(BufferedReader reader) {
         EntityManager entityManager = DBUtil.getEntityManagerFactory().createEntityManager();
-        Product product = entityManager.find(Product.class, 2L);
-        TypedQuery<Consumer> query = entityManager.createQuery("SELECT c FROM Consumer c INNER JOIN c.products p WHERE p.id = :productId", Consumer.class);
-        List<Consumer> resultList = query.setParameter("productId", product.getId()).getResultList();
-        resultList.forEach(System.out::println);
+        Product product = enterDataForProduct(reader);
+        if (product != null) {
+            TypedQuery<Consumer> query = entityManager.createQuery(
+                    "SELECT c FROM Consumer c INNER JOIN c.products p WHERE p.id = :productId"
+                    , Consumer.class);
+            List<Consumer> resultList = query.setParameter("productId", product.getId()).getResultList();
+            resultList.forEach(System.out::println);
+        } else {
+            System.out.println("Продукт не найден.");
+        }
+        entityManager.close();
     }
 
     private static void showAllConsumer() {
@@ -99,6 +113,32 @@ public class Application {
         List<Product> products = entityManager.createQuery("FROM Product", Product.class).getResultList();
         products.forEach(System.out::println);
         entityManager.close();
+    }
+
+    private static Consumer enterDataForConsumer(BufferedReader reader) {
+        Consumer consumer = null;
+        try {
+            System.out.println("Введите id покупателя.");
+            String rawData = reader.readLine();
+            long id = Long.parseLong(rawData);
+            EntityManager entityManager = DBUtil.getEntityManagerFactory().createEntityManager();
+            consumer = entityManager.find(Consumer.class, id);
+            entityManager.close();
+        } catch (IOException | NumberFormatException ignored) {}
+        return consumer;
+    }
+
+    private static Product enterDataForProduct(BufferedReader reader) {
+        Product product = null;
+        try {
+            System.out.println("Введите id продукта.");
+            String rawData = reader.readLine();
+            long id = Long.parseLong(rawData);
+            EntityManager entityManager = DBUtil.getEntityManagerFactory().createEntityManager();
+            product = entityManager.find(Product.class, id);
+            entityManager.close();
+        } catch (IOException | NumberFormatException ignored) {}
+        return product;
     }
 
     private static void initializeDataDB(int count) {
