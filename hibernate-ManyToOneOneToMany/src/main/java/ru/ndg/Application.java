@@ -36,7 +36,7 @@ public class Application {
                             showAllProductForConsumer(reader);
                             break;
                         case 2:
-//                            showAllConsumerForProduct(reader);
+                            showAllConsumerForProduct(reader);
                             break;
                         case 3:
                             showAllConsumer();
@@ -78,7 +78,6 @@ public class Application {
         System.out.println(sb.toString());
     }
 
-    // TODO: 28.11.2020 Доработать
     private static void showAllProductForConsumer(BufferedReader reader) {
         EntityManager entityManager = DBUtil.getEntityManagerFactory().createEntityManager();
         Consumer consumer = enterDataForConsumer(reader);
@@ -87,23 +86,31 @@ public class Application {
                     "SELECT p FROM Purchase p INNER JOIN p.consumer c WHERE c.id = :consumerId"
                     , Purchase.class);
             List<Purchase> resultList = query.setParameter("consumerId", consumer.getId()).getResultList();
-            resultList.forEach(System.out::println);
+            resultList.forEach((purchase) -> System.out.println(String.format(
+                    "Product: {id: %d, name: %s, price: %s}"
+                    , purchase.getProduct().getId()
+                    , purchase.getProduct().getName()
+                    , purchase.getProduct().getPrice()
+            )));
         } else {
             System.out.println("Покупатель не найден.");
         }
         entityManager.close();
     }
 
-    // TODO: 28.11.2020 Доработать
     private static void showAllConsumerForProduct(BufferedReader reader) {
         EntityManager entityManager = DBUtil.getEntityManagerFactory().createEntityManager();
         Product product = enterDataForProduct(reader);
         if (product != null) {
-            TypedQuery<Consumer> query = entityManager.createQuery(
-                    "SELECT c FROM Consumer c INNER JOIN c.products p WHERE p.id = :productId"
-                    , Consumer.class);
-            List<Consumer> resultList = query.setParameter("productId", product.getId()).getResultList();
-            resultList.forEach(System.out::println);
+            TypedQuery<Purchase> query = entityManager.createQuery(
+                    "SELECT p FROM Purchase p INNER JOIN p.product prod WHERE prod.id = :productId"
+                    , Purchase.class);
+            List<Purchase> resultList = query.setParameter("productId", product.getId()).getResultList();
+            resultList.forEach((purchase) -> System.out.println(String.format(
+                    "Consumer: {id: %d, name: %s}"
+                    , purchase.getConsumer().getId()
+                    , purchase.getConsumer().getName()
+            )));
         } else {
             System.out.println("Продукт не найден.");
         }
@@ -127,7 +134,14 @@ public class Application {
     private static void showAllPurchase() {
         EntityManager entityManager = DBUtil.getEntityManagerFactory().createEntityManager();
         List<Purchase> purchases = entityManager.createQuery("FROM Purchase", Purchase.class).getResultList();
-        purchases.forEach(System.out::println);
+        purchases.forEach((purchase) -> System.out.println(String.format(
+                "Purchase: {id: %d, consumer: %s, product: %s, current price: %s, date purchase: %s}"
+                , purchase.getId()
+                , purchase.getConsumer().getName()
+                , purchase.getProduct().getName()
+                , purchase.getPricePurchaseDate()
+                , purchase.getDatePurchase()
+        )));
         entityManager.close();
     }
 

@@ -28,8 +28,6 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(of = "id")
-// TODO: 28.11.2020 Доработать вывод покупки
-@ToString(of = {"id", "pricePurchaseDate", "datePurchase"})
 public class Purchase {
 
     @Id
