@@ -11,10 +11,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 public class Application {
+
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
 
     public static void main(String[] args) {
 
@@ -140,7 +144,7 @@ public class Application {
                 , purchase.getConsumer().getName()
                 , purchase.getProduct().getName()
                 , purchase.getPricePurchaseDate()
-                , purchase.getDatePurchase()
+                , dateFormat.format(purchase.getDatePurchase())
         )));
         entityManager.close();
     }
@@ -228,11 +232,15 @@ public class Application {
             if (product != null) {
                 Consumer consumer = entityManager.find(Consumer.class, i);
                 if (consumer != null) {
+                    Calendar instance = Calendar.getInstance();
+                    instance.setTime(new Date());
+                    instance.add(Calendar.DATE, (int)i);
+                    Date date = instance.getTime();
                     Purchase purchase = Purchase.builder()
                             .consumer(consumer)
                             .product(product)
                             .pricePurchaseDate(product.getPrice())
-                            .datePurchase(new Date(System.currentTimeMillis() + i * i))
+                            .datePurchase(date)
                             .build();
                     entityManager.merge(purchase);
                 }
