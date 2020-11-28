@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -35,6 +36,6 @@ public class Consumer {
     @Column(name = "name")
     private String name;
 
-    @OneToMany(mappedBy = "consumer", orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "consumer", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private Set<Purchase> purchases;
 }
